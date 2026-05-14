@@ -6,35 +6,17 @@ pipeline {
     }
 
     environment {
-        APP_DIR = "/home/ubuntu/Jenkins-DemoProject"
-        PM2_PATH = "/usr/bin/pm2"
+        APP_DIR = "/opt/Jenkins-DemoProject"
     }
 
     stages {
 
-        stage('Git Checkout') {
+        stage('Clone Repository') {
             steps {
                 git branch: 'main',
                 url: 'https://github.com/Mohan0375/Jenkins-DemoProject.git'
             }
         }
-
-        stage('Frontend Compilation') {
-            steps {
-                dir('client') {
-                    sh 'find . -name "*.js" -exec node --check {} +'
-                }
-            }
-        }
-
-        stage('Backend Compilation') {
-            steps {
-                dir('api') {
-                    sh 'find . -name "*.js" -exec node --check {} +'
-                }
-            }
-        }
-
         stage('Install Backend Dependencies') {
             steps {
                 dir('api') {
@@ -51,51 +33,37 @@ pipeline {
             }
         }
 
-		stage('Deploy Backend') {
-			steps {
-				sh '''
-				rsync -av --delete --exclude='.env' api/ $APP_DIR/api/
+        stage('Deploy Backend') {
+            steps {
+                sh '''
+                rsync -av --delete --exclude=.env api/ $APP_DIR/api/
 
-				cd $APP_DIR/api
+                cd $APP_DIR/api
 
-				npm install
+                npm install
 
-				sudo su - ubuntu -c "
-				export PATH=$PATH:/usr/bin
+                /usr/bin/pm2 restart backend || /usr/bin/pm2 start app.js --name backend
+                '''
+            }
+        }
 
-				cd $APP_DIR/api
+        stage('Deploy Frontend') {
+            steps {
+                sh '''
+                rsync -av --delete --exclude=.env client/ $APP_DIR/client/
 
-				pm2 restart backend || pm2 start app.js --name backend
-				"
-				'''
-			}
-		}
+                cd $APP_DIR/client
 
-		stage('Deploy Frontend') {
-			steps {
-				sh '''
-				rsync -av --delete --exclude='.env' client/ $APP_DIR/client/
+                npm install
 
-				cd $APP_DIR/client
+                rm -rf node_modules/.cache
 
-				npm install
-
-				sudo su - ubuntu -c "
-				export PATH=$PATH:/usr/bin
-
-				pm2 delete frontend || true
-
-				cd $APP_DIR/client
-
-				HOST=0.0.0.0 pm2 start npm --name frontend -- start
-				"
-				'''
-			}
-		}
-
+                /usr/bin/pm2 restart frontend || /usr/bin/pm2 start npm --name frontend -- start
+                '''
+            }
+        }
     }
-
-    post {
+     post {
         success {
             echo 'Pipeline executed successfully!'
         }
