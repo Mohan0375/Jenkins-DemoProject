@@ -47,8 +47,7 @@ function Login() {
           <button type="submit">Login</button>
         </form>
         <div className="login-tip">
-          Tip: use a strong password and never share your credentials. For access
-          requests contact <a href="mailto:support@devopsshack.com">support</a>.
+          Tip: use a strong password and never share your credentials. For access do nothing <a href="mailto:support@devopsshack.com">support</a>.
         </div>
         <p>
           Don't have an account? <Link to="/register">Register</Link>
