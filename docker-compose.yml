@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql-db
+
+    environment:
+      MYSQL_ROOT_PASSWORD: sushma123
+      MYSQL_DATABASE: userdetails
+
+    ports:
+      - "3306:3306"
+    
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    build: ./api
+    container_name: backend
+
+    ports:
+      - "5000:5000"
+      
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: sushma123
+      DB_NAME: userdetails
+      JWT_SECRET: SuperSecretKey
+      PORT: 5000
+
+    depends_on:
+      - mysql
+
+  frontend:
+    build: ./client
+    container_name: frontend
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:

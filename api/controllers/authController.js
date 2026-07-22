@@ -31,16 +31,21 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-
+  
+  console.log("Email received:", email);
+  console.log("Password received:", password);	
   try {
     const results = await query('SELECT * FROM users WHERE email = ?', [email]);
+    console.log("Users found:", results.length);
 
     if (results.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const user = results[0];
+    console.log("Stored hash:", user.password);
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Password match:", isMatch);
 
     if (!isMatch) {
       return res.status(401).json({ error: 'Invalid email or password' });
