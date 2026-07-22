@@ -10,5 +10,13 @@ pipeline {
                 sh 'ls -la'
             }
         }
+
+	stage('Install Backend Dependencies') {
+    steps {
+        dir('api') {
+            sh 'npm install'
+         }
+        }
+      }
     }
 }
