@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import React, { useEffect, useState, useContext, useRef, useCallback } from 'react';
 import axios from '../axios';
 import UserForm from '../components/UserForm';
 import { AuthContext } from '../context/AuthContext';
@@ -18,9 +18,9 @@ function UserDashboard() {
     } else {
       fetchUsers();
     }
-  }, [user, navigate]);
+  }, [user, navigate, fetchUsers]);
 
-  const fetchUsers = () => {
+  const fetchUsers = useCallback(() => {
     axios
       .get('/users') // ✅ Fixed
       .then(res => setUsers(res.data))
@@ -28,7 +28,7 @@ function UserDashboard() {
         console.error('Fetch Error:', err);
         if (err.response?.status === 401) logout();
       });
-  };
+  }, [logout]);
 
   const handleCreate = (userData) => {
     axios
