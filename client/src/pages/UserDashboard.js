@@ -12,14 +12,6 @@ function UserDashboard() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-    } else {
-      fetchUsers();
-    }
-  }, [user, navigate, fetchUsers]);
-
   const fetchUsers = useCallback(() => {
     axios
       .get('/users') // ✅ Fixed
@@ -29,6 +21,14 @@ function UserDashboard() {
         if (err.response?.status === 401) logout();
       });
   }, [logout]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    } else {
+      fetchUsers();
+    }
+  }, [user, navigate, fetchUsers]);
 
   const handleCreate = (userData) => {
     axios
