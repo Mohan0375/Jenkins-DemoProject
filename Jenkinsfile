@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_HUB = "mohan118917"
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -16,7 +17,7 @@ pipeline {
         stage('Build Backend Image') {
             steps {
                 dir('api') {
-                    sh "docker build -t ${DOCKER_HUB}/user-management-backend:latest ."
+                    sh "docker build -t ${DOCKER_HUB}/user-management-backend:${IMAGE_TAG} ."
                 }
             }
         }
@@ -24,7 +25,7 @@ pipeline {
         stage('Build Frontend Image') {
             steps {
                 dir('client') {
-                    sh "docker build -t ${DOCKER_HUB}/user-management-frontend:latest ."
+                    sh "docker build -t ${DOCKER_HUB}/user-management-frontend:${IMAGE_TAG} ."
                 }
             }
         }
@@ -32,8 +33,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', 'dockerhub') {
-                    sh ''' docker push ${DOCKER_HUB}/user-management-backend:latest
-                           docker push ${DOCKER_HUB}/user-management-frontend:latest
+                    sh ''' docker push ${DOCKER_HUB}/user-management-backend:${IMAGE_TAG}
+                           docker push ${DOCKER_HUB}/user-management-frontend:${IMAGE_TAG}
                        '''            
                 }
             }
@@ -43,6 +44,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
+                    echo IMAGE_TAG=${IMAGE_TAG} > .env
                     docker compose pull
                     docker compose up -d
                 '''
