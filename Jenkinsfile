@@ -5,36 +5,48 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Repository successfully checked out.'
+                checkout scm
             }
         }
 
-        stage('Install Backend Dependencies') {
+        stage('Build Backend Image') {
             steps {
                 dir('api') {
-                    sh 'node -v'
-                    sh 'npm -v'
-                    sh 'npm install'
+                    sh 'docker build -t user-management-backend:latest .'
                 }
             }
         }
 
-        stage('Install Frontend Dependencies') {
+        stage('Build Frontend Image') {
             steps {
                 dir('client') {
-                    sh 'node -v'
-                    sh 'npm -v'
-                    sh 'npm install'
+                    sh 'docker build -t user-management-frontend:latest .'
                 }
             }
         }
-       stage('Build Frontend') {
-           steps {
-               dir('client') {
-                    sh 'npm run build'
-               }
-           }
-       }	
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                    docker compose down || true
+                    docker compose up -d
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Application deployed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed!'
+        }
+
+        always {
+            sh 'docker image ls'
+            sh 'docker ps -a'
+        }
     }
 }
-
