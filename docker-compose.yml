@@ -15,7 +15,7 @@ services:
       - ./mysql-init/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   backend:
-    image: mohan118917/user-management-backend:${IMAGE_TAG}
+    image: mohan118917/user-management-backend:latest
     container_name: backend
 
     ports:
@@ -33,7 +33,7 @@ services:
       - mysql
 
   frontend:
-    image: mohan118917/user-management-frontend:${IMAGE_TAG}
+    image: mohan118917/user-management-frontend:latest
     container_name: frontend
 
     ports:
